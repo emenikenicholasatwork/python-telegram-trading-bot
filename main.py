@@ -1,34 +1,20 @@
-#importing the required packages
-import os
-from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import ContextTypes, Application, CommandHandler
-from crypto_utils import fetch_coin_price, fetch_bitcoin_price, fetch_solana_price, fetch_ethereum_price
+#
+###
+# This file kick-start the bot and setup the database.
+###
+#
 
-#loading the dotenv file
-load_dotenv()
+# importing packages that will be required to setup the bot
+from database_utils import setup_db
+from bot import BOT
 
-#geting the bot token from the .env file
-BOT_TOKEN=os.getenv('BOT_TOKEN')
-
-# writing a start function for the bot
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    sol_price = await fetch_solana_price()
-    btc_price = await fetch_bitcoin_price()
-    eth_price = await fetch_ethereum_price()
-
-    text = (f"<b>SOL</b>: ${sol_price}=<b>BTC</b>: ${btc_price}=<b>ETH</b>: ${eth_price}"
-            f"<b>Trading Bot Official</b>"
-            f"Here is your Solana wallet. Fund your Wallet and start trading.")
-    await update.message.reply_text(text, parse_mode="HTML")
+# function to create a new instance of the bot
+def start_bot():
+    setup_db()
+    BOT()
 
 
-# writing the main function to start the bot
-def main() -> None:
-    application = Application.builder().token(BOT_TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.run_polling(poll_interval=5)
-
-# running the main function when the script starts
+# starting the bot when script is started
 if __name__ == "__main__":
-    main()
+    start_bot()
+
