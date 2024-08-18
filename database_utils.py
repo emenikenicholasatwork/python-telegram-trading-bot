@@ -1,7 +1,6 @@
 # importing the required packages for the file
 import sqlite3
-from sqlite3 import connect
-from wallet_utils import decrypt_data
+from helper_utils import decrypt_data
 
 # function to check if the database needs to be created
 def setup_db():
