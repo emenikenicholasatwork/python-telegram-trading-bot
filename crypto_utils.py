@@ -1,50 +1,24 @@
-# importing the required packages for the file
-import asyncio
+import logging
+from decimal import Decimal
 import ccxt
 
-# initialising the binance exchange
-exchange = ccxt.binance()
+from config import set_up_logger
+set_up_logger()
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
+exchange = ccxt.bitfinex2()
 
-# asynchronous function to get the price of coin
-async def fetch_coin_price(coin_name):
-    # trying the request in case of errors
+async def fetch_coin_price(coin_name: str) -> None | str | float | int | Decimal:
     try:
-        # running the request in another thread to save time
-        ticker = await asyncio.to_thread(exchange.fetch_ticker, coin_name+"/USDT")
-        return ticker['last']
+        logger.info(f"Fetching {coin_name} price")
+        ticker = exchange.fetch_ticker(coin_name+"/USDT")
+        if 'last' in ticker:
+            price = ticker['last']
+            logger.info(f"Returning price for {coin_name}: {price}")
+            return price
+        else:
+            logger.error(f"Ticker data for {coin_name} does not contain 'last' price")
+            return ""
     except Exception as e:
-        # returning the encountered error
-        return f"Error fetching {coin_name} price"
-
-# asynchronous function to get the price of sol
-async def fetch_solana_price():
-    # trying the request in case of errors
-    try:
-        # running the request in another thread to save time
-        ticker = await asyncio.to_thread(exchange.fetch_ticker, "SOL/USDT")
-        return ticker['last']
-    except Exception as e:
-        # returning the encountered error
-        return "Error fetching Sol price"
-
-# asynchronous function to get the price of btc
-async def fetch_bitcoin_price():
-    # trying the request in case of errors
-    try:
-        # running the request in another thread to save time
-        ticker = await asyncio.to_thread(exchange.fetch_ticker, "BTC/USDT")
-        return ticker['last']
-    except Exception as e:
-        # returning the encountered error
-        return "Error fetching Btc price"
-
-# asynchronous function to get the price of eth
-async def fetch_ethereum_price():
-    # trying the request in case of errors
-    try:
-        # running the request in another thread to save time
-        ticker = await asyncio.to_thread(exchange.fetch_ticker, "ETH/USDT")
-        return ticker['last']
-    except Exception as e:
-        # returning the caught error
-        return "Error fetching Eth price"
+        logger.error(f"Failed to fetch {coin_name} price. Error: {e}")
+        return None
