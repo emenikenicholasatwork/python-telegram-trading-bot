@@ -1,4 +1,5 @@
 #importing the required packages
+from multiprocessing import process
 import os
 import asyncio
 import logging
@@ -16,6 +17,7 @@ load_dotenv()
 BOT_TOKEN=os.getenv('BOT_TOKEN')
 if BOT_TOKEN.__eq__(""):
     logger.error("Bot token is missing. kindly insert token in .env file")
+    os._exit(1)
     
 
 BUY_TOKEN_NAME = 1
@@ -23,7 +25,7 @@ BUY_TOKEN_NAME = 1
 class BOT:
     def __init__(self):
         logger.info("Initializing bot")
-        application = Application.builder().token(BOT_TOKEN).build()
+        application = Application.builder().token(BOT_TOKEN).build() # type: ignore
         logger.info("Bot successfully launched.")
         application.add_handler(CommandHandler("start", self.start))
         application.add_handler(CallbackQueryHandler(self.button_clicked))
@@ -33,7 +35,7 @@ class BOT:
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.info("Start command by the user")
         logger.info("fetching price datas")
-        userid = update.message.from_user.id
+        userid = update.message.from_user.id # type: ignore
         prices_result = await asyncio.gather(
             fetch_coin_price("SOL"),
             fetch_coin_price("BTC"),
@@ -81,17 +83,17 @@ class BOT:
                 f"💡💡💡💡💡💡💡\n"
                 f"Enter a token address to quickly open the buy menu."
                 )
-        await update.message.reply_text(text, reply_markup=inline_keyboard, parse_mode="HTML")
+        await update.message.reply_text(text, reply_markup=inline_keyboard, parse_mode="HTML") # type: ignore
 
     async def button_clicked(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
-        if query.data == 'buy':
-            context.user_data['state'] = BUY_TOKEN_NAME
-            await query.message.reply_text(text="✏️ Enter the token to buy and base token e.g BTC/USDT : ", reply_markup=ForceReply())
+        if query.data == 'buy': # type: ignore
+            context.user_data['state'] = BUY_TOKEN_NAME # type: ignore
+            await query.message.reply_text(text="✏️ Enter the token to buy and base token e.g BTC/USDT : ", reply_markup=ForceReply()) # type: ignore
 
 
     async  def user_reply(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if context.user_data['state'] == BUY_TOKEN_NAME:
+        if context.user_data['state'] == BUY_TOKEN_NAME: # type: ignore
             try:
                 pass
             except Exception as e:
@@ -99,9 +101,9 @@ class BOT:
 
 
     async def buy_token(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        token_name = update.message.text
+        token_name = update.message.text # type: ignore
         try:
-            token_price = await fetch_coin_price(token_name)
+            token_price = await fetch_coin_price(token_name) # type: ignore
             if token_price:
                 pass
             else:

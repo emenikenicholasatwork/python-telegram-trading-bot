@@ -1,32 +1,34 @@
-# importing all the packages required for the file
 from cryptography.fernet import Fernet
 import os
 from dotenv import load_dotenv
 load_dotenv()
-encryption_key = os.getenv('ENCRYPTION_KEY')
+from config import set_up_logger
+set_up_logger()
+encryption_key: str | None | bytes = os.getenv('ENCRYPTION_KEY')
+import logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
-# function to encrypt data
+if not encryption_key:
+    logger.error("Encryption key is missing kindly insert the encryption key in .env file.")
+    os._exit(1)
+try:
+    encryption_key = encryption_key.encode()   
+    cipher = Fernet(encryption_key)
+except Exception as e:
+    logger.error(f"Invalid encryption key: {e}")
+    os._exit(1)
+
 def encrypt_data(data):
-    # first trying the process in case of errors
     try:
-        # creating a fernet instance with the encryption key
-        cipher = Fernet(encryption_key)
-        # encrypt the data with the fernet instance and return the value
         encrypted_string = cipher.encrypt(data.encode('uft-8'))
         return encrypted_string
     except Exception as e:
-        # printing the encountered error
         print(f"Error encrypting data: {e}")
 
-# function to decrypt data
 def decrypt_data(data):
-    # first trying the process in case of errors
     try:
-        # creating an instance of Fernet with the private key
-        cipher = Fernet(encryption_key)
-        # decrypt the data with fernet instance and return the value
         decrypted_string = cipher.decrypt(data).decode('utf-8')
         return  decrypted_string
     except Exception as e:
-        # printing the encountered error
         print(f"Error decrypting data: {e}")

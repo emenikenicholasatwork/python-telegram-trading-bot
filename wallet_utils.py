@@ -1,13 +1,12 @@
 from config import set_up_logger
 from database_utils import get_private_key_from_db, save_user_credentials
-
 set_up_logger()
 import logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 from solders.keypair import Keypair
 
-def create_solana_wallet(userid: int) -> any:
+def create_solana_wallet(userid: int) -> any: # type: ignore
     p_key = get_private_key_from_db(userid)
     if p_key:
         logger.info("user wallet already exist")
