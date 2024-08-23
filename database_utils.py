@@ -1,5 +1,5 @@
 import sqlite3
-from helper_utils import decrypt_data
+from helper_utils import decrypt_data, encrypt_data
 import logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def get_private_key_from_db(telegram_user_id):
         row = cursor.fetchone()
         connection.close()
         if row:
-            return decrypt_data(row[2])
+            return decrypt_data(row[3])
         return None
     except Exception as e:
         print(f"Error fetching the private key: {e}")
@@ -52,9 +52,11 @@ def get_wallet_address_from_db(telegram_user_id):
 
 def save_user_credentials(telegram_id: int, private_key: str, wallet_address: str):
     try:
+        encrypted_private_key = encrypt_data(private_key)
+        encrypted_wallet_address = encrypt_data(wallet_address)
         connection = sqlite3.connect("users.db")
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO users (telegram_id, private_key, address) VALUES (?, ?, ?)", (telegram_id, private_key, wallet_address))
+        cursor.execute("INSERT INTO users (telegram_id, private_key, address) VALUES (?, ?, ?)", (telegram_id, encrypted_private_key, encrypted_wallet_address))
         connection.commit()
         connection.close()
         logger.info("Successfully saved new user to db")

@@ -21,7 +21,7 @@ except Exception as e:
 
 def encrypt_data(data):
     try:
-        encrypted_string = cipher.encrypt(data.encode('uft-8'))
+        encrypted_string = cipher.encrypt(data.encode('utf-8'))
         return encrypted_string
     except Exception as e:
         print(f"Error encrypting data: {e}")

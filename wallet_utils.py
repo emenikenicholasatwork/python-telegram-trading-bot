@@ -1,3 +1,4 @@
+from solana.rpc.async_api import AsyncClient
 from config import set_up_logger
 from database_utils import get_private_key_from_db, save_user_credentials
 set_up_logger()
@@ -5,12 +6,13 @@ import logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 from solders.keypair import Keypair
+from solders.pubkey import Pubkey
 
 def create_solana_wallet(userid: int) -> any: # type: ignore
-    p_key = get_private_key_from_db(userid)
-    if p_key:
+    address = get_private_key_from_db(userid)
+    if address:
         logger.info("user wallet already exist")
-        return p_key
+        return address
     else:
         keypair = Keypair()
         pub = keypair.pubkey()
@@ -22,8 +24,16 @@ def create_solana_wallet(userid: int) -> any: # type: ignore
 
 
 
-async def get_solana_wallet_balance():
-    return ""
+async def get_balance(address):
+    try:
+        async with AsyncClient("https://api.mainnet-beta.solana.com") as client:
+            pub_key = Pubkey(address)
+            balance = await client.get_balance(pub_key)
+            logger.info(balance)
+    except Exception as e:
+        logger.info(f"Error fetching balance: {e}")
+        
+        
 
 def get_sol_in_dollar():
     return ""
