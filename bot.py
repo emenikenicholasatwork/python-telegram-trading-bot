@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from telegram.ext import ContextTypes, Application, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
 from crypto_utils import fetch_coin_price
-from wallet_utils import create_solana_wallet, get_balance, get_sol_in_dollar
+from wallet_utils import create_solana_wallet, get_sol_balance, convert_sol_to_dollar
 from config import set_up_logger
 
 set_up_logger()
@@ -42,9 +42,8 @@ class BOT:
         )
         pub_key = create_solana_wallet(userid)
         sol_price, btc_price, eth_price = prices_result
-        solana_balance = get_balance(pub_key)
-        logger.info(solana_balance)
-        # solana_in_dollar = get_sol_in_dollar()
+        solana_balance = await get_sol_balance(pub_key)
+        solana_in_dollar = convert_sol_to_dollar(await solana_balance)
         inline_keyboard = InlineKeyboardMarkup(
             [
                 [
@@ -79,7 +78,7 @@ class BOT:
                 f"Here is your Solana wallet. Fund your Wallet and start trading.\n"
                 f"🅴 Your Solana Wallet:\n"
                 f"<code>{pub_key}</code> (Tap to copy)\n\n"
-                f"Balance:  SOL ($)\n"
+                f"Balance:  SOL {solana_balance} (${solana_in_dollar})\n"
                 f"💡💡💡💡💡💡💡\n"
                 f"Enter a token address to quickly open the buy menu."
                 )
