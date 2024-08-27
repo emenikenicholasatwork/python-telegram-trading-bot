@@ -1,4 +1,3 @@
-from solana.rpc.async_api import AsyncClient
 from config import set_up_logger
 from database_utils import get_private_key_from_db, save_user_credentials
 set_up_logger()
@@ -7,6 +6,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
+from solders.rpc.requests import GetBalance
 
 def create_solana_wallet(userid: int) -> any: # type: ignore
     address = get_private_key_from_db(userid)
@@ -22,14 +22,11 @@ def create_solana_wallet(userid: int) -> any: # type: ignore
         except Exception as e:
             logger.error(f"Error while saving credentials: {e}")
 
-
-
-async def get_balance(address):
+def get_balance(address):
     try:
-        async with AsyncClient("https://api.mainnet-beta.solana.com") as client:
-            pub_key = Pubkey(address)
-            balance = await client.get_balance(pub_key)
-            logger.info(balance)
+        pub_key = Pubkey.from_string(address)
+        balance = GetBalance(pub_key).to_json() # type: ignore
+        return balance
     except Exception as e:
         logger.info(f"Error fetching balance: {e}")
         

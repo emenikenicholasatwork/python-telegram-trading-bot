@@ -1,4 +1,3 @@
-#importing the required packages
 from multiprocessing import process
 import os
 import asyncio
@@ -43,7 +42,8 @@ class BOT:
         )
         pub_key = create_solana_wallet(userid)
         sol_price, btc_price, eth_price = prices_result
-        solana_wallet = await get_balance(pub_key)
+        solana_balance = get_balance(pub_key)
+        logger.info(solana_balance)
         # solana_in_dollar = get_sol_in_dollar()
         inline_keyboard = InlineKeyboardMarkup(
             [
