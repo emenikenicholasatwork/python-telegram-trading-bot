@@ -42,8 +42,7 @@ class BOT:
         )
         pub_key = create_solana_wallet(userid)
         sol_price, btc_price, eth_price = prices_result
-        solana_balance = await get_sol_balance(pub_key)
-        solana_in_dollar = convert_sol_to_dollar(await solana_balance)
+        solana_balance, sol_in_dollar = await get_sol_balance(pub_key)
         inline_keyboard = InlineKeyboardMarkup(
             [
                 [
@@ -78,7 +77,7 @@ class BOT:
                 f"Here is your Solana wallet. Fund your Wallet and start trading.\n"
                 f"🅴 Your Solana Wallet:\n"
                 f"<code>{pub_key}</code> (Tap to copy)\n\n"
-                f"Balance:  SOL {solana_balance} (${solana_in_dollar})\n"
+                f"Balance:<code>{solana_balance} SOL (${sol_in_dollar})</code>\n"
                 f"💡💡💡💡💡💡💡\n"
                 f"Enter a token address to quickly open the buy menu."
                 )
@@ -86,23 +85,24 @@ class BOT:
 
     async def button_clicked(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
-        if query.data == 'buy': # type: ignore
-            context.user_data['state'] = BUY_TOKEN_NAME # type: ignore
-            await query.message.reply_text(text="✏️ Enter the token to buy and base token e.g BTC/USDT : ", reply_markup=ForceReply()) # type: ignore
+        if query.data == 'buy':
+            logger.info("buy button clicked")
+            context.user_data['state'] = BUY_TOKEN_NAME
+            await query.message.reply_text(text="✏️ Enter the token to buy and base token e.g BTC/USDT : ", reply_markup=ForceReply())
 
 
     async  def user_reply(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if context.user_data['state'] == BUY_TOKEN_NAME: # type: ignore
+        if context.user_data['state'] == BUY_TOKEN_NAME:
             try:
-                pass
+                await update.message.reply_text("are you sure you entered the right address")
             except Exception as e:
                 print(f"Error while trying to buy token: {e}")
 
 
     async def buy_token(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        token_name = update.message.text # type: ignore
+        token_name = update.message.text
         try:
-            token_price = await fetch_coin_price(token_name) # type: ignore
+            token_price = await fetch_coin_price(token_name)
             if token_price:
                 pass
             else:
