@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from telegram.ext import ContextTypes, Application, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
 from crypto_utils import fetch_coin_price
-from wallet_utils import create_solana_wallet, get_sol_balance, convert_sol_to_dollar
+from wallet_utils import create_solana_wallet, get_sol_balance, get_token_details_from_address
 from config import set_up_logger
 
 set_up_logger()
@@ -94,7 +94,8 @@ class BOT:
     async  def user_reply(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if context.user_data['state'] == BUY_TOKEN_NAME:
             try:
-                await update.message.reply_text("are you sure you entered the right address")
+                text = update.message.text
+                await get_token_details_from_address(text)
             except Exception as e:
                 print(f"Error while trying to buy token: {e}")
 

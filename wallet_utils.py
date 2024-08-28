@@ -1,5 +1,7 @@
+import solana
 from solana.rpc.async_api import AsyncClient
 import requests
+import solana.utils
 from config import set_up_logger
 from database_utils import get_private_key_from_db, save_user_credentials
 set_up_logger()
@@ -8,6 +10,8 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
+from spl.token.async_client import AsyncToken
+program_id = Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 
 def create_solana_wallet(userid: int) -> any: # type: ignore
     address = get_private_key_from_db(userid)
@@ -50,8 +54,12 @@ async def convert_sol_to_dollar(sol):
         return None
     
 async def get_token_details_from_address(address: str):
+    logger.info("fetching token details")
     try:
-        pass
+        async with AsyncClient("https://api.minnet-beta.solana.com") as client:
+            token_public_key = Pubkey.from_string(address)
+            token = AsyncToken(client, token_public_key, program_id=program_id)
+            logger.info(token)
     except Exception as e:
         logger.error(f"Error fetching token details: {e}")
         return None
